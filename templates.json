@@ -1,0 +1,22 @@
+[
+    {
+      "type": "stack",
+      "title": "Private Git Test",
+      "description": "Private Git Test Stack",
+      "note":
+          "Private Git Test to pull from private git repository.",
+      "categories": ["web"],
+      "platform": "linux",
+      "logo": "https://portainer.io/images/logo_alt.png",
+      "repository": {
+          "url": "git@github.com:datalyze-solutions/portainer-ssh.git",
+          "stackfile": "test/docker-compose.yml"
+      },
+      "env": [
+          {
+            "name": "domain",
+            "label": "Domain Name"
+          }
+        ]
+  }
+]

@@ -1,0 +1,23 @@
+version: '3.3'
+
+services:
+  www:
+    image: nginx:stable-alpine
+    networks:
+      web:
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+        window: 120s
+      labels:
+        - "traefik.enable=true"
+        - "traefik.port=80"
+        - "traefik.docker.network=web"
+        - "traefik.frontend.rule=Host:${domain}"
+        - "traefik.backend.loadbalancer.method=wrr"
+
+networks:
+  web:

@@ -1,0 +1,72 @@
+version: "3.3"
+
+services:
+  dev:
+    image: portainer/tools
+    build: .
+    ports:
+      - "127.0.0.1:9000:9000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - data:/data
+      - $SSH_AUTH_SOCK:/ssh-agent
+    environment:
+      - SSH_AUTH_SOCK=/ssh-agent
+      - SSH_KNOWN_HOSTS=/root/.ssh/known_hosts
+    secrets:
+      - source: pkey
+        target: /root/.ssh/id_rsa
+        mode: 0400
+      - source: pubkey
+        target: /root/.ssh/id_rsa.pub
+        mode: 0400
+      - source: known_hosts
+        target: /root/.ssh/known_hosts
+        mode: 0444
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.port=9000"
+        - "traefik.docker.network=web"
+        - "traefik.frontend.rule=Host:portainer.mydomain.com"
+        - "traefik.backend.loadbalancer.method=wrr"
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+        window: 120s
+    networks:
+      # external:
+      internal:
+        aliases:
+          - internal.portainer
+
+  templates:
+    image: nginx:stable-alpine
+    volumes:
+      - ./templates.json:/usr/share/nginx/html/templates.json:ro
+    networks:
+      internal:
+        aliases:
+          - internal.templates
+    deploy:
+      labels:
+        - "traefik.enable=false"
+
+volumes:
+  data:
+
+networks:
+  internal:
+  # external:
+  #   external:
+  #     name: web
+
+secrets:
+  pkey:
+    file: $HOME/.ssh/id_rsa
+  pubkey:
+    file: $HOME/.ssh/id_rsa.pub
+  known_hosts:
+    file: $HOME/.ssh/known_hosts

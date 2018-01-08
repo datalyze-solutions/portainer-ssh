@@ -1,0 +1,1 @@
+https://github.com/datalyze-solutions/portainer-ssh
